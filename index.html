@@ -33,7 +33,7 @@
     h1{margin:0;font-size:24px;font-weight:600;flex:1;min-width:200px}
     .header-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .notification-bell{position:relative;cursor:pointer;font-size:20px}
-    .notification-badge{position:absolute;top:-8px;right:-8px;background:var(--danger);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+    .notification-badge{position:absolute;top:-8px;right:-8px;background:var(--danger);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
     .card{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(11,94,168,0.08);margin-bottom:16px}
     input,textarea,select,button{padding:10px 12px;border-radius:8px;border:1px solid var(--input-border);font-size:14px;background:var(--input-bg);color:var(--input-fg);font-family:inherit}
     input,textarea,select{width:100%;margin-top:8px}
@@ -72,7 +72,7 @@
     .stat-box{background:rgba(11,94,168,0.1);padding:16px;border-radius:8px;text-align:center;border-left:4px solid var(--primary)}
     .stat-number{font-size:24px;font-weight:bold;color:var(--primary)}
     .stat-label{font-size:12px;color:var(--muted);margin-top:4px}
-    .notification-item{background:var(--input-bg);padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:start;gap:12px}
+    .notification-item{background:var(--input-bg);padding:12px;border-radius:8px;margin-bottom:8px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:start}
     .notification-item.unread{background:rgba(11,94,168,0.05);border-left-color:var(--warning)}
     .notification-content{flex:1}
     .notification-title{font-weight:600;color:var(--primary);font-size:13px}
@@ -101,6 +101,7 @@
         </div>
         <button id="themeToggle" class="btn ghost" title="Переключить тему">🌙</button>
         <div id="userInfo" class="small"></div>
+        <button id="logoutBtn" class="btn ghost" style="display:none" title="Выйти из системы">🚪 Выйти</button>
       </div>
     </header>
 
@@ -144,7 +145,6 @@
       <div class="card notes">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <h3>📄 Материалы</h3>
-          <button id="logoutBtn" class="btn ghost">🚪 Выйти</button>
         </div>
         <input id="title" placeholder="Название материала">
         <textarea id="desc" placeholder="Краткое описание"></textarea>
@@ -426,6 +426,7 @@
           document.getElementById('loginBox').style.display = 'none';
           document.getElementById('mainBox').style.display = 'block';
           document.getElementById('userInfo').textContent = `👤 ${username} (${role})`;
+          document.getElementById('logoutBtn').style.display = 'block';
           
           if (role === 'admin') {
             document.getElementById('adminPanel').style.display = 'block';
@@ -457,6 +458,7 @@
       document.getElementById('login').value = '';
       document.getElementById('password').value = '';
       document.getElementById('loginError').textContent = '';
+      document.getElementById('logoutBtn').style.display = 'none';
       current = '';
       role = '';
       currentPass = '';
@@ -587,7 +589,6 @@
     function editNote(idx) {
       currentEditIndex = idx;
       currentEditIsOwnMaterial = false;
-      // Load and show edit modal
       document.getElementById('editModal').classList.add('active');
     }
 
@@ -620,7 +621,7 @@
       if (assignTo === null) return;
 
       try {
-        const response = await fetch(API + '/admin/materials/assign', {
+        const response = await fetch(API + '/admin/materials/assign_group', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ index: idx, assigned_to: assignTo, admin_login: current, admin_password: currentPass })
@@ -968,7 +969,7 @@
         q.choices.forEach((choice, i) => {
           const isSelected = testAnswers[currentQuestionIndex]?.includes(i);
           html += `
-            <label style="display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--input-border);border-radius:8px;cursor:pointer;transition:all 0.2s;${isSelected ? 'border-color:var(--primary);background:rgba(11,94,168,0.1)' : ''}">
+            <label style="display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--input-border);border-radius:8px;cursor:pointer;transition:all 0.2s;${isSelected ? 'border-color:var(--primary)' : ''}">
               <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="handleMultipleChoice(${i})">
               <span>${choice}</span>
             </label>
@@ -980,7 +981,7 @@
         q.choices.forEach((choice, i) => {
           const isSelected = testAnswers[currentQuestionIndex] === i;
           html += `
-            <label style="display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--input-border);border-radius:8px;cursor:pointer;transition:all 0.2s;${isSelected ? 'border-color:var(--primary);background:rgba(11,94,168,0.1)' : ''}">
+            <label style="display:flex;align-items:center;gap:12px;padding:12px;border:2px solid var(--input-border);border-radius:8px;cursor:pointer;transition:all 0.2s;${isSelected ? 'border-color:var(--primary)' : ''}">
               <input type="radio" name="q${currentQuestionIndex}" ${isSelected ? 'checked' : ''} onchange="handleSingleChoice(${i})">
               <span>${choice}</span>
             </label>
@@ -1007,100 +1008,83 @@
       }
       const arr = testAnswers[currentQuestionIndex];
       const pos = arr.indexOf(idx);
-      if (pos === -1) {
-        arr.push(idx);
-      } else {
+      if (pos !== -1) {
         arr.splice(pos, 1);
+      } else {
+        arr.push(idx);
       }
-      testAnswers[currentQuestionIndex] = arr;
     }
 
-    document.getElementById('prevBtn')?.addEventListener('click', () => {
-      if (currentQuestionIndex > 0) {
-        currentQuestionIndex--;
-        showTestQuestion();
-      }
-    });
-
-    document.getElementById('nextBtn')?.addEventListener('click', () => {
+    function nextQuestion() {
       if (currentQuestionIndex < currentTestData.questions.length - 1) {
         currentQuestionIndex++;
         showTestQuestion();
       }
-    });
+    }
 
-    document.getElementById('submitBtn')?.addEventListener('click', submitTest);
+    function prevQuestion() {
+      if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        showTestQuestion();
+      }
+    }
 
     async function submitTest() {
-      const timeSpent = Math.round((Date.now() - testStartTime) / 1000);
-      const answers = testAnswers.map((a, i) => {
-        if (currentTestData.questions[i].type === 'multiple' && !Array.isArray(a)) {
-          return currentTestData.questions[i].choices[a] || null;
-        }
-        return Array.isArray(a) ? a.map(idx => currentTestData.questions[i].choices[idx]) : (currentTestData.questions[i].choices[a] || null);
-      });
-
+      const timeSpent = Math.floor((Date.now() - testStartTime) / 1000);
       try {
         const response = await fetch(API + '/tests/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             test_id: currentTestData.id,
-            answers,
+            answers: testAnswers,
             user: current,
             time_spent: timeSpent
           })
         });
 
         const result = await response.json();
-        if (response.ok) {
-          showTestResult(result);
-        }
+        showTestResult(result);
       } catch (e) {
         alert('Ошибка при отправке теста');
       }
     }
 
     function showTestResult(result) {
+      const percentage = result.percentage || 0;
       document.getElementById('testContent').style.display = 'none';
       document.getElementById('testResultContainer').style.display = 'block';
+      document.getElementById('testScore').textContent = `${percentage}%`;
+      
+      let details = `<p>Правильно: ${result.score} из ${result.total}</p>`;
+      if (result.time_spent) {
+        const mins = Math.floor(result.time_spent / 60);
+        const secs = result.time_spent % 60;
+        details += `<p>Время: ${mins}м ${secs}с</p>`;
+      }
+      document.getElementById('testDetails').innerHTML = details;
+      
       document.getElementById('prevBtn').style.display = 'none';
       document.getElementById('nextBtn').style.display = 'none';
       document.getElementById('submitBtn').style.display = 'none';
-
-      const percentage = result.percentage;
-      let badge = '';
-      if (percentage >= 80) badge = '<span class="badge badge-success">✓ Отлично!</span>';
-      else if (percentage >= 60) badge = '<span class="badge badge-warning">⚠ Хорошо</span>';
-      else badge = '<span class="badge badge-warning">⚠ Нужно улучшить</span>';
-
-      document.getElementById('testScore').innerHTML = `${result.score} / ${result.total} (${percentage}%) ${badge}`;
-
-      let details = '<div style="text-align:left;max-height:300px;overflow-y:auto">';
-      result.details.forEach(d => {
-        const icon = d.correct ? '✓' : '✗';
-        const color = d.correct ? 'var(--success)' : 'var(--danger)';
-        details += `
-          <div style="padding:8px;border-bottom:1px solid var(--input-border);color:${color}">
-            <strong>${icon} Вопрос ${d.question}:</strong> ${d.user_answer || 'нет ответа'}
-          </div>
-        `;
-      });
-      details += '</div>';
-      document.getElementById('testDetails').innerHTML = details;
     }
 
     function closeTestModal() {
       document.getElementById('testModal').classList.remove('active');
+      document.getElementById('testContent').style.display = 'block';
     }
 
     async function deleteTest(testId) {
-      if (!confirm('Удалить тест?')) return;
+      if (!confirm('Удалить этот тест?')) return;
       try {
         const response = await fetch(API + '/admin/tests/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: testId, admin_login: current, admin_password: currentPass })
+          body: JSON.stringify({
+            id: testId,
+            admin_login: current,
+            admin_password: currentPass
+          })
         });
         if (response.ok) refreshTests();
       } catch (e) {
@@ -1108,35 +1092,7 @@
       }
     }
 
-    // ===== АДМИНИСТРАТОР =====
-    function switchAdminTab(tabName) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + tabName).classList.add('active');
-      event.target.classList.add('active');
-    }
-
-    async function loadUsersList() {
-      try {
-        const response = await fetch(API + '/admin/users/list', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ admin_login: current, admin_password: currentPass })
-        });
-
-        const users = await response.json();
-        const list = document.getElementById('usersList');
-        list.innerHTML = Object.entries(users).map(([name, data]) => `
-          <div style="padding:8px;border-bottom:1px solid var(--input-border);display:flex;justify-content:space-between">
-            <span>👤 ${name}</span>
-            <span style="color:var(--primary);font-weight:600">${data.role === 'admin' ? '⚙️ Админ' : '📚 Ученик'}</span>
-          </div>
-        `).join('');
-      } catch (e) {
-        console.log('Ошибка загрузки пользователей');
-      }
-    }
-
+    // ===== ПОЛЬЗОВАТЕЛИ =====
     async function saveUser() {
       const login = document.getElementById('u_login').value;
       const password = document.getElementById('u_pass').value;
@@ -1151,7 +1107,13 @@
         const response = await fetch(API + '/admin/users/add_or_update', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ login, password, role, admin_login: current, admin_password: currentPass })
+          body: JSON.stringify({
+            login,
+            password,
+            role,
+            admin_login: current,
+            admin_password: currentPass
+          })
         });
 
         if (response.ok) {
@@ -1159,12 +1121,9 @@
           document.getElementById('u_login').value = '';
           document.getElementById('u_pass').value = '';
           loadUsersList();
-        } else {
-          const data = await response.json();
-          alert(data.error || 'Ошибка');
         }
       } catch (e) {
-        alert('Ошибка сервера');
+        alert('Ошибка');
       }
     }
 
@@ -1175,25 +1134,95 @@
         return;
       }
 
-      if (!confirm(`Удалить пользователя ${login}?`)) return;
+      if (!confirm('Вы уверены?')) return;
 
       try {
         const response = await fetch(API + '/admin/users/delete', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ login, admin_login: current, admin_password: currentPass })
+          body: JSON.stringify({
+            login,
+            admin_login: current,
+            admin_password: currentPass
+          })
         });
 
         if (response.ok) {
           alert('Пользователь удален!');
           document.getElementById('del_login').value = '';
           loadUsersList();
-        } else {
-          const data = await response.json();
-          alert(data.error || 'Ошибка');
         }
       } catch (e) {
         alert('Ошибка');
+      }
+    }
+
+    async function loadUsersList() {
+      try {
+        const response = await fetch(API + '/admin/users/list', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            admin_login: current,
+            admin_password: currentPass
+          })
+        });
+
+        const users = await response.json();
+        const list = document.getElementById('usersList');
+        list.innerHTML = Object.entries(users).map(([login, data]) => 
+          `<div>${login} (${data.role})</div>`
+        ).join('');
+      } catch (e) {
+        console.log('Ошибка загрузки пользователей');
+      }
+    }
+
+    // ===== АДМИНИСТРАТОР =====
+    function switchAdminTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+    }
+
+    async function loadStats() {
+      try {
+        const response = await fetch(API + '/admin/analytics/stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            admin_login: current,
+            admin_password: currentPass
+          })
+        });
+
+        const stats = await response.json();
+        const grid = document.getElementById('statsGrid');
+        grid.innerHTML = `
+          <div class="stat-box">
+            <div class="stat-number">${stats.users}</div>
+            <div class="stat-label">Пользователей</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">${stats.tests}</div>
+            <div class="stat-label">Тестов</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">${stats.completed_tests}</div>
+            <div class="stat-label">Завершено</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">${stats.average_score}%</div>
+            <div class="stat-label">Средний балл</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">${stats.materials}</div>
+            <div class="stat-label">Материалов</div>
+          </div>
+        `;
+      } catch (e) {
+        console.log('Ошибка загрузки статистики');
       }
     }
 
@@ -1202,66 +1231,24 @@
         const response = await fetch(API + '/admin/results', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ admin_login: current, admin_password: currentPass })
+          body: JSON.stringify({
+            admin_login: current,
+            admin_password: currentPass
+          })
         });
 
         const results = await response.json();
         const list = document.getElementById('resultsList');
-        
         if (results.length === 0) {
-          list.innerHTML = '<p style="text-align:center;color:var(--muted)">Результатов нет</p>';
+          list.innerHTML = '<p>Результатов нет</p>';
           return;
         }
 
-        list.innerHTML = results.map(r => `
-          <div style="padding:8px;border-bottom:1px solid var(--input-border)">
-            <strong>${r.user}</strong> - Тест #${r.test_id}: ${r.score}/${r.total} (${r.percentage}%)<br>
-            <small style="color:var(--muted)">Время: ${r.time_spent}сек | ${new Date(r.completed_at).toLocaleString('ru-RU')}</small>
-          </div>
-        `).join('');
+        list.innerHTML = results.map(r => 
+          `<div>👤 ${r.user}: ${r.score}/${r.total} (${r.percentage}%)</div>`
+        ).join('');
       } catch (e) {
-        console.log('Ошибка загрузки результатов');
-      }
-    }
-
-    async function loadStats() {
-      try {
-        const response = await fetch(API + '/admin/analytics/stats', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ admin_login: current, admin_password: currentPass })
-        });
-
-        const stats = await response.json();
-        const grid = document.getElementById('statsGrid');
-        grid.innerHTML = `
-          <div class="stat-box">
-            <div class="stat-number">${stats.users}</div>
-            <div class="stat-label">👥 Пользователей</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${stats.materials}</div>
-            <div class="stat-label">📄 Материалов</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${stats.tests}</div>
-            <div class="stat-label">🧪 Тестов</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${stats.completed_tests}</div>
-            <div class="stat-label">✓ Завершено</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${stats.average_score}%</div>
-            <div class="stat-label">📊 Средний балл</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-number">${stats.news}</div>
-            <div class="stat-label">📰 Новостей</div>
-          </div>
-        `;
-      } catch (e) {
-        console.log('Ошибка загрузки статистики');
+        console.log('Ошибка');
       }
     }
   </script>

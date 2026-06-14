@@ -108,10 +108,10 @@ if not users:
 notes = load_json(NOTES_FILE, [])
 news = load_json(NEWS_FILE, [])
 guides = load_json(GUIDES_FILE, [])
-settings = load_json(SETTINGS_FILE, {"theme": "light", "language": "ru", "version": "4.5.0"})
+settings = load_json(SETTINGS_FILE, {"theme": "light", "language": "ru", "version": "4.0.0"})
 tests = load_json(TESTS_FILE, [])
 results = load_json(RESULTS_FILE, [])
-analytics = load_json(ANALYTICS_FILE, {"version": "4.5.0", "stats": {}})
+analytics = load_json(ANALYTICS_FILE, {"version": "4.0.0", "stats": {}})
 notifications = load_json(NOTIFICATIONS_FILE, [])
 groups = load_json(GROUPS_FILE, {})
 events = load_json(EVENTS_FILE, [])
@@ -193,7 +193,7 @@ def login():
         "ok": True,
         "role": u.get("role", "student"),
         "group": u.get("group"),
-        "version": "4.5.0"
+        "version": "4.0.0"
     })
 
 
@@ -842,14 +842,14 @@ def get_tests_public():
                             continue
                         if isinstance(c, dict):
                             normalized.append(str(c.get('text') or c.get('label') or c.get('choice') or json.dumps(c,
-                                                                                                                   ensure_ascii=False)))
+                                                                                                                    ensure_ascii=False)))
                         else:
                             normalized.append(str(c))
                     choices = normalized
                 else:
                     if isinstance(choices_raw, dict):
                         choices = [str(choices_raw.get('text') or choices_raw.get('label') or json.dumps(choices_raw,
-                                                                                                         ensure_ascii=False))]
+                                                                                                          ensure_ascii=False))]
                     else:
                         choices = [str(choices_raw)]
 
@@ -1007,7 +1007,7 @@ def get_analytics():
     avg_score = round(sum([r.get('percentage', 0) for r in results]) / len(results)) if results else 0
     
     stats = {
-        "version": "4.5.0",
+        "version": "4.0.0",
         "users": user_count,
         "groups": len(groups),
         "tests": test_count,

@@ -130,7 +130,7 @@
 
     <!-- ОСНОВНОЙ ИНТЕРФЕЙС -->
     <div id="mainBox" style="display:none">
-      <!-- ПАНЕЛЬ СТАТИСТИКИ (АДМИН) -->
+      <!-- ПАНЕЛЬ СТАТИСТИКИ (ТОЛЬКО ДЛЯ АДМИНОВ) -->
       <div id="statsPanel" style="display:none">
         <div class="card">
           <h3>📊 Статистика</h3>
@@ -143,20 +143,21 @@
 
       <!-- МАТЕРИАЛЫ -->
       <div class="card notes">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-          <h3>📄 Материалы</h3>
-        </div>
-        <input id="title" placeholder="Название материала">
-        <textarea id="desc" placeholder="Краткое описание"></textarea>
-        <input id="image" type="file" accept="image/*">
-        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-          <button id="addNoteBtn" class="btn">➕ Добавить</button>
-          <button id="refreshBtn" class="btn ghost">🔄 Обновить</button>
+        <h3>📄 Материалы</h3>
+        <!-- ФОРМА ДОБАВЛЕНИЯ МАТЕРИАЛО�� (видна только админам и ученикам для своих) -->
+        <div id="materialsFormSection">
+          <input id="title" placeholder="Название материала">
+          <textarea id="desc" placeholder="Краткое описание"></textarea>
+          <input id="image" type="file" accept="image/*">
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button id="addNoteBtn" class="btn">➕ Добавить</button>
+            <button id="refreshBtn" class="btn ghost">🔄 Обновить</button>
+          </div>
         </div>
         <div id="notesList" class="note-grid"></div>
       </div>
 
-      <!-- НОВОСТИ -->
+      <!-- НОВОСТИ (только просмотр для учеников) -->
       <div class="card news" style="margin-top:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <h3>📰 Новости</h3>
@@ -174,7 +175,7 @@
         <div id="newsList" class="note-grid"></div>
       </div>
 
-      <!-- ПОСОБИЯ -->
+      <!-- ПОСОБИЯ (только просмотр для учеников) -->
       <div class="card guides" style="margin-top:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <h3>📚 Пособия</h3>
@@ -192,7 +193,7 @@
         <div id="guidesList" class="note-grid"></div>
       </div>
 
-      <!-- ТЕСТЫ -->
+      <!-- ТЕСТЫ (только прохождение для учеников) -->
       <div id="testsPanel" class="card tests" style="margin-top:16px">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
           <h3>🧪 Тесты</h3>
@@ -201,56 +202,58 @@
         <div id="testsList" class="note-grid"></div>
       </div>
 
-      <!-- ПАНЕЛЬ АДМИНИСТРАТОРА -->
-      <div id="adminPanel" class="card admin" style="display:none;margin-top:16px">
-        <h3>⚙️ Панель администратора v4.0.0</h3>
-        
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchAdminTab('users')">👥 Пользователи</button>
-          <button class="tab-btn" onclick="switchAdminTab('settings')">⚙️ Параметры</button>
-          <button class="tab-btn" onclick="switchAdminTab('results')">📊 Результаты</button>
-        </div>
+      <!-- ПАНЕЛЬ АДМИНИСТРАТОРА (ТОЛЬКО ДЛЯ АДМИНОВ) -->
+      <div id="adminPanel" style="display:none;margin-top:16px">
+        <div class="card admin">
+          <h3>⚙️ Панель администратора v4.0.0</h3>
+          
+          <div class="tabs">
+            <button class="tab-btn active" onclick="switchAdminTab('users')">👥 Пользователи</button>
+            <button class="tab-btn" onclick="switchAdminTab('settings')">⚙️ Параметры</button>
+            <button class="tab-btn" onclick="switchAdminTab('results')">���� Результаты</button>
+          </div>
 
-        <!-- ВКЛАДКА ПОЛЬЗОВАТЕЛИ -->
-        <div id="tab-users" class="tab-content active">
-          <h4>Управление пользователями</h4>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-            <input id="u_login" placeholder="Логин" style="flex:1;min-width:120px">
-            <input id="u_pass" placeholder="Пароль" style="flex:1;min-width:120px">
-            <select id="u_role" style="flex:1;min-width:100px"><option value="student">Ученик</option><option value="admin">Админ</option></select>
-            <button id="saveUserBtn" class="btn">💾 Сохранить</button>
+          <!-- ВКЛАДКА ПОЛЬЗОВАТЕЛИ -->
+          <div id="tab-users" class="tab-content active">
+            <h4>Управление пользователями</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+              <input id="u_login" placeholder="Логин" style="flex:1;min-width:120px">
+              <input id="u_pass" placeholder="Пароль" style="flex:1;min-width:120px">
+              <select id="u_role" style="flex:1;min-width:100px"><option value="student">Ученик</option><option value="admin">Админ</option></select>
+              <button id="saveUserBtn" class="btn">💾 Сохранить</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+              <input id="del_login" placeholder="Логин для удаления" style="flex:1;min-width:150px">
+              <button id="delUserBtn" class="btn danger">🗑️ Удалить</button>
+            </div>
+            <h4 style="margin-top:16px">Список пользователей</h4>
+            <div id="usersList" class="small" style="max-height:200px;overflow-y:auto;border:1px solid var(--input-border);padding:8px;border-radius:8px"></div>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-            <input id="del_login" placeholder="Логин для удаления" style="flex:1;min-width:150px">
-            <button id="delUserBtn" class="btn danger">🗑️ Удалить</button>
-          </div>
-          <h4 style="margin-top:16px">Список пользователей</h4>
-          <div id="usersList" class="small" style="max-height:200px;overflow-y:auto;border:1px solid var(--input-border);padding:8px;border-radius:8px"></div>
-        </div>
 
-        <!-- ВКЛАДКА ПАРАМЕТРЫ -->
-        <div id="tab-settings" class="tab-content">
-          <h4>Параметры системы</h4>
-          <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-            <label style="min-width:100px">Тема оформления:</label>
-            <select id="themeSel" style="flex:1;min-width:150px">
-              <option value="light">☀️ Светлая</option>
-              <option value="dark">🌙 Темная</option>
-            </select>
-            <button id="saveThemeBtn" class="btn ghost">💾 Применить</button>
+          <!-- ВКЛАДКА ПАРАМЕТРЫ -->
+          <div id="tab-settings" class="tab-content">
+            <h4>Параметры системы</h4>
+            <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+              <label style="min-width:100px">Тема оформления:</label>
+              <select id="themeSel" style="flex:1;min-width:150px">
+                <option value="light">☀️ Светлая</option>
+                <option value="dark">🌙 Темная</option>
+              </select>
+              <button id="saveThemeBtn" class="btn ghost">💾 Применить</button>
+            </div>
+            <div style="padding:12px;background:rgba(11,94,168,0.1);border-radius:8px;margin-top:12px">
+              <strong>Информация о системе:</strong><br>
+              Версия: 4.0.0<br>
+              Функции: Аналитика, Уведомления, Rate Limiting<br>
+            </div>
           </div>
-          <div style="padding:12px;background:rgba(11,94,168,0.1);border-radius:8px;margin-top:12px">
-            <strong>Информация о системе:</strong><br>
-            Версия: 4.0.0<br>
-            Функции: Аналитика, Уведомления, Rate Limiting<br>
-          </div>
-        </div>
 
-        <!-- ВКЛАДКА РЕЗУЛЬТАТЫ -->
-        <div id="tab-results" class="tab-content">
-          <h4>Результаты тестов</h4>
-          <button id="loadResultsBtn" class="btn ghost" style="margin-bottom:8px">🔄 Загрузить результаты</button>
-          <div id="resultsList" class="small" style="max-height:300px;overflow-y:auto;border:1px solid var(--input-border);padding:8px;border-radius:8px"></div>
+          <!-- ВКЛАДКА РЕЗУЛЬТАТЫ -->
+          <div id="tab-results" class="tab-content">
+            <h4>Результаты тестов</h4>
+            <button id="loadResultsBtn" class="btn ghost" style="margin-bottom:8px">🔄 Загрузить результаты</button>
+            <div id="resultsList" class="small" style="max-height:300px;overflow-y:auto;border:1px solid var(--input-border);padding:8px;border-radius:8px"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -429,13 +432,23 @@
           document.getElementById('logoutBtn').style.display = 'block';
           
           if (role === 'admin') {
+            // АДМИН видит: панель статистики, панель администратора, кнопки для создания новостей/пособий/тестов
             document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('statsPanel').style.display = 'block';
             document.getElementById('newsAdminBtn').style.display = 'block';
             document.getElementById('guidesAdminBtn').style.display = 'block';
             document.getElementById('testsAdminBtn').style.display = 'block';
-            document.getElementById('statsPanel').style.display = 'block';
+            document.getElementById('materialsFormSection').style.display = 'block';
             document.getElementById('themeSel').value = localStorage.getItem('theme') || 'light';
             loadStats();
+          } else {
+            // УЧЕНИК видит: форму добавления СВОИХ материалов, но не видит админ-панель и статистику
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('statsPanel').style.display = 'none';
+            document.getElementById('newsAdminBtn').style.display = 'none';
+            document.getElementById('guidesAdminBtn').style.display = 'none';
+            document.getElementById('testsAdminBtn').style.display = 'none';
+            document.getElementById('materialsFormSection').style.display = 'block';
           }
           
           refreshNotes();
@@ -570,15 +583,16 @@
               <span>👤 ${note.user || 'система'}</span>
               <span>${note.created_at ? new Date(note.created_at).toLocaleDateString('ru-RU') : ''}</span>
             </div>
-            ${role === 'admin' ? `
-              <div class="btn-group" style="margin-top:8px">
+            <div class="btn-group" style="margin-top:8px">
+              <button class="btn small ghost">⬇️ Скачать</button>
+              ${role === 'admin' ? `
                 <button class="btn small" onclick="editNote(${idx})">✏️</button>
                 <button class="btn small" onclick="deleteNote(${idx})">🗑️</button>
                 <button class="btn small ghost" onclick="assignMaterial(${idx})">👤</button>
-              </div>
-            ` : note.user === current ? `
-              <button class="btn small ghost" style="width:100%;margin-top:8px" onclick="editOwnNote(${idx})">✏️ Редактировать</button>
-            ` : ''}
+              ` : note.user === current ? `
+                <button class="btn small" onclick="editOwnNote(${idx})">✏️</button>
+              ` : ''}
+            </div>
           </div>
         `).join('');
       } catch (e) {
@@ -635,7 +649,7 @@
       }
     }
 
-    // ===== НОВОСТИ =====
+    // ===== НОВОСТИ (только админ может создавать и редактировать) =====
     function showNewsForm() {
       document.getElementById('newsForm').style.display = 'block';
     }
@@ -692,11 +706,12 @@
               <span>👤 ${item.user}</span>
               <span>${new Date(item.created_at).toLocaleDateString('ru-RU')}</span>
             </div>
-            ${role === 'admin' ? `
-              <div class="btn-group" style="margin-top:8px">
-                <button class="btn small danger" onclick="deleteNews(${idx})">🗑️ Удалить</button>
-              </div>
-            ` : ''}
+            <div class="btn-group" style="margin-top:8px">
+              <button class="btn small ghost">⬇️ Скачать</button>
+              ${role === 'admin' ? `
+                <button class="btn small danger" onclick="deleteNews(${idx})">🗑️</button>
+              ` : ''}
+            </div>
           </div>
         `).join('');
       } catch (e) {
@@ -718,7 +733,7 @@
       }
     }
 
-    // ===== ПОСОБИЯ =====
+    // ===== ПОСОБИЯ (только админ может создавать и редактировать) =====
     function showGuideForm() {
       document.getElementById('guidesForm').style.display = 'block';
     }
@@ -775,9 +790,12 @@
               <span>👤 ${item.user}</span>
               <span>${new Date(item.created_at).toLocaleDateString('ru-RU')}</span>
             </div>
-            ${role === 'admin' ? `
-              <button class="btn small danger" style="width:100%;margin-top:8px" onclick="deleteGuide(${idx})">🗑️ Удалить</button>
-            ` : ''}
+            <div class="btn-group" style="margin-top:8px">
+              <button class="btn small ghost">⬇️ Скачать</button>
+              ${role === 'admin' ? `
+                <button class="btn small danger" onclick="deleteGuide(${idx})">🗑️</button>
+              ` : ''}
+            </div>
           </div>
         `).join('');
       } catch (e) {
@@ -799,7 +817,7 @@
       }
     }
 
-    // ===== ТЕСТЫ =====
+    // ===== ТЕСТЫ (админ создает, ученик только проходит) =====
     async function refreshTests() {
       try {
         const response = await fetch(API + '/tests');
